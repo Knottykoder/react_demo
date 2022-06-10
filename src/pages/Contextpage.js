@@ -19,12 +19,7 @@ const reducer = (state, action) => {
         ...state,
         data: [
           ...state.data,
-          {
-            id: new Date().getTime().toString(),
-            name: action.value.name,
-            city: action.value.city,
-            age: action.value.age,
-          },
+         action.value
         ],
       };
     case "Remove":
@@ -64,11 +59,11 @@ const reducer = (state, action) => {
         tableInfo: state.data,
       };
       case "update":  
-         let findIndex = state.data.findIndex(item=>item.id == action.value.value)
+         let findIndex = state.data.findIndex(item=>item.id === action.value.value)
          let elements = [...state.data]
-         elements[findIndex ] = {id:action.value.value, name: action.value.name,
-          city: action.value.city,
-          age: action.value.age }
+         elements[findIndex ] = {id:action.value.value, name: action.value.form.name,
+          city: action.value.form.city,
+          age: action.value.form.age }
       return {
         ...state,
          data: elements
@@ -80,15 +75,39 @@ const reducer = (state, action) => {
 
 const Contextpage = () => {
   const context = createContext();
+  const [form,setform] = useState({name:"",city:"",age:""})
+  const [isediting , setisediting] = useState(false)
   const [value, setvalue] = useState();
   const [state, dispatch] = useReducer(reducer, initialState);
 
- 
-  const saveInfo = (name, city, age) => {
+  useEffect(()=>{
+    let find = state.data.find(item=>item.id===value)
+    if (find === undefined) {
+      return;
+    } else {
+      dispatch({type: "updateObject", value: find});
+    }
+    setform({
+      name: state.tempObj.name,
+      city: state.tempObj.city,
+      age: state.tempObj.age
+    });
+  },[value,state.tempObj])
+
+  const handleChange = (event) => {
+    setform({
+      ...form,
+      [event.target.name]: event.target.value,
+      id: new Date().getTime().toString()
+    });
+  };
+
+  const saveInfo = () => {
     dispatch({
       type: "Save",
-      value: { name, city, age },
+      value: form,
     });
+    setform({ name: "", city: "" ,age:""});
   };
   const key = state.data.flatMap((key) => Object.keys(key));
   const tags = key.filter((item, index) => key.indexOf(item) === index);
@@ -125,23 +144,22 @@ const Contextpage = () => {
  
   const getUpdateObject = (e)=>{
     setvalue(e.target.value)
-    let find = state.data.find(item=>item.id==value)
-    if (find === undefined) {
-      return;
-    } else {
-      dispatch({type: "updateObject", value: find});
-    }
+    setisediting(true)
   }
-   const updated = (name,city,age)=>{
+   const updated = ()=>{
      dispatch({
        type: "update",
-       value:{name,city,age,value}
+       value:{value,form}
      })
+     setform({ name: "", city: "" ,age:""});
+     setisediting(false)
    }
   return (
     <div>
       <h1>USING CONTEXT</h1>
-      <Form addInfo={saveInfo} update={state.tempObj} updateList={updated}/>
+      <Form handleChange={handleChange} value={form}/>
+      <Button text={isediting? "update": "Save"} onClick={isediting? updated : saveInfo }/>
+      <br/>
       <select onChange={getUpdateObject}>
         <option>----Select Id</option>
         {state.data.map((key) => (

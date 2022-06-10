@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Form from "../Components/Form";
 import Button from "../Components/Button";
 import Table from "../Components/Table";
 
 const Usestatepage = () => {
+  const [form,setform] = useState({name:"",city:"",age:""})
   const [List, setList] = useState([]);
   const [value, setvalue] = useState();
   const [tags, settags] = useState([]);
@@ -11,20 +12,39 @@ const Usestatepage = () => {
   const [tableData, settableData] = useState([]);
   const [selectvalue, setselectvalue] = useState();
   const [object, setObject] = useState({});
-
-  const adduser = (name, city, age) => {
-    setList((prev) => {
-      return [
-        ...prev,
-        { id: new Date().getTime().toString(), name, city, age },
-      ];
+  const [isediting , setisediting] = useState(false)
+   
+  useEffect(()=>{
+    let find = List.find((item) => item.id === value);
+    if (find === undefined) {
+      return;
+    } else {
+      setObject(find);
+    }
+    setform({
+      name: object.name,
+      city: object.city,
+      age: object.age
     });
+  },[value,object])
+
+  const handleChange = (event) => {
+    setform({
+      ...form,
+      [event.target.name]: event.target.value,
+      id: new Date().getTime().toString()
+    });
+  };
+
+  const adduser = () => {
+    setList([...List, form]);
+    setform({ name: "", city: "" ,age:""});
   };
 
   const removeHandler = () => {
     let updatelist = List.filter((item) => item.id !== value);
-
     setList(updatelist);
+    setisediting(false)
   };
 
   const gettags = () => {
@@ -62,25 +82,23 @@ const Usestatepage = () => {
 
   const findObject = (e) => {
     setvalue(e.target.value);
-    let find = List.find((item) => item.id === value);
-    if (find === undefined) {
-      return;
-    } else {
-      setObject(find);
-    }
-     };
-  const updateInfo = (name,city,age) => {
-    let findindex = List.findIndex(item=>item.id===value)
-     let elements = [...List]
-     elements[findindex] = { id: value ,name,city,age};
-     setList(elements)
-  }
+    setisediting(true)
+    };
+
+    const updateData = () => {
+      let findindex = List.findIndex((item) => item.id === value);
+      let elements = [...List];
+      elements[findindex] = { id: value, name: form.name, city: form.city ,age:form.age};
+      setList(elements);
+      setform({ name: "", city: "" ,age:""});
+      setisediting(false);
+    };
 
   return (
     <div>
       <h1>USING USESTATE</h1>
-      <Form adduser={adduser} update={object} updateInfo={updateInfo}/>
-
+      <Form  value={form}  handleChange={handleChange}/>
+       <Button text={isediting? "update": "Save"} onClick={isediting? updateData : adduser}/>
       <br />
       <select value={value} onChange={findObject}>
         <option>----Select Id</option>

@@ -1,13 +1,10 @@
-export const saveData = (name,city,age)=>{
+export const saveData = (user)=>{
     return {
         type:"SAVE",
         payload:{
-            data:{name,
-            city,
-        age,
-    id: new Date().getTime().toString()}
+            data:user
         }
-    }
+        }
 }
 
 export const deleteData = (id)=>{
@@ -39,12 +36,10 @@ export const getObject = (obj)=>{
        payload: obj
   }
 }
-export const updateInfo = (name,city,age,id)=>{
+export const updateInfo = (user,value)=>{
    return{
        type: "UpdateList",
-       payload: {
-        name, city, age,id
-    }
+       payload: {user,value}
    }
 }
 

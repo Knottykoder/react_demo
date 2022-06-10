@@ -45,9 +45,11 @@ switch(action.type){
        tempObj : action.payload
    }
    case "UpdateList": 
-    let findIndex = [...state.info].findIndex(item=>item.id === action.payload.id)
+    let findIndex = [...state.info].findIndex(item=>item.id === action.payload.value)
      let element = [...state.info]
-     element[findIndex] =  action.payload
+     element[findIndex] =  {id:action.payload.value, name: action.payload.user.name,
+        city: action.payload.user.city,
+        age: action.payload.user.age }
    return {
        ...state,
        info : [...element]
